@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(node_modules\\\\.bin\\\\next build *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Join-Path *)",
+      "WebFetch(domain:localhost)",
+      "Bash(node -e \"require\\('playwright'\\)\")",
+      "Bash(cd /tmp)",
+      "Bash(npx --yes playwright@latest --version)",
+      "Read(//tmp/**)",
+      "Bash(node_modules/.bin/playwright install *)"
+    ]
+  }
+}
