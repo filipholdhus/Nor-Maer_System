@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore, useState } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { StasjonsoppsettSkjerm } from "@/components/scan/StasjonsoppsettSkjerm";
 import {
   InnloggingSkjerm,
@@ -8,56 +8,43 @@ import {
 } from "@/components/scan/InnloggingSkjerm";
 import { HovudSkjerm } from "@/components/scan/HovudSkjerm";
 
-const STASJON_KEY = "nor_maer_skannepunkt";
-const STASJON_ENDRA_EVENT = "nor_maer_stasjon_endra";
-
-interface LagretStasjon {
-  id: string;
-  namn: string;
-  stasjon: string;
-}
+// Beheld den gamle nøkkelen slik at allereie konfigurerte einingar blir
+// migrerte direkte til fleksibel pilotmodus.
+const EINING_KEY = "nor_maer_skannepunkt";
+const EINING_ENDRA_EVENT = "nor_maer_stasjon_endra";
 
 function subscribe(cb: () => void) {
-  window.addEventListener(STASJON_ENDRA_EVENT, cb);
+  window.addEventListener(EINING_ENDRA_EVENT, cb);
   window.addEventListener("storage", cb);
   return () => {
-    window.removeEventListener(STASJON_ENDRA_EVENT, cb);
+    window.removeEventListener(EINING_ENDRA_EVENT, cb);
     window.removeEventListener("storage", cb);
   };
 }
 
 function getSnapshot(): string | null {
-  return localStorage.getItem(STASJON_KEY);
+  return localStorage.getItem(EINING_KEY);
 }
 
 export default function ScanSide() {
   // undefined = server snapshot (hydration guard before localStorage is read)
-  const lagretStasjon = useSyncExternalStore(
+  const lagretEining = useSyncExternalStore(
     subscribe,
     getSnapshot,
     () => undefined
   );
-  const stasjon = useMemo(() => {
-    if (!lagretStasjon) return null;
-    try {
-      return JSON.parse(lagretStasjon) as LagretStasjon;
-    } catch {
-      return null;
-    }
-  }, [lagretStasjon]);
   const [visOppsett, setVisOppsett] = useState(false);
   const [brukar, setBrukar] = useState<InnloggaBrukar | null>(null);
 
-  if (lagretStasjon === undefined) return null;
+  if (lagretEining === undefined) return null;
 
-  // ── Stasjonsoppsett ────────────────────────────────────────────────────────
-  if (stasjon === null || visOppsett) {
+  if (lagretEining === null || visOppsett) {
     return (
       <StasjonsoppsettSkjerm
-        onFullfoert={(sp) => {
-          localStorage.setItem(STASJON_KEY, JSON.stringify(sp));
-          window.dispatchEvent(new Event(STASJON_ENDRA_EVENT));
-          setBrukar(null); // log out current user when station changes
+        onFullfoert={() => {
+          localStorage.setItem(EINING_KEY, JSON.stringify({ modus: "fleksibel" }));
+          window.dispatchEvent(new Event(EINING_ENDRA_EVENT));
+          setBrukar(null);
           setVisOppsett(false);
         }}
       />
@@ -72,10 +59,9 @@ export default function ScanSide() {
   // ── Hovudskjerm ────────────────────────────────────────────────────────────
   return (
     <HovudSkjerm
-      stasjon={stasjon}
       brukar={brukar}
       onLoggUt={() => setBrukar(null)}
-      onEndreStasjon={() => setVisOppsett(true)}
+      onEndreEining={() => setVisOppsett(true)}
     />
   );
 }

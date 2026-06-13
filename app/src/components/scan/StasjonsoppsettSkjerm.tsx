@@ -2,45 +2,32 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { STASJON_NAMN } from "@/lib/domene/typar";
-import type { Stasjon } from "@/lib/domene/typar";
-
-type Fase = "laster" | "logg_inn" | "stasjon_val";
-
-interface Skannepunkt {
-  id: string;
-  namn: string;
-  stasjon: Stasjon;
-}
 
 interface Props {
-  onFullfoert: (sp: { id: string; namn: string; stasjon: string }) => void;
+  onFullfoert: () => void;
 }
 
 export function StasjonsoppsettSkjerm({ onFullfoert }: Props) {
   const supabase = useRef(supabaseBrowser()).current;
-
-  const [fase, setFase] = useState<Fase>("laster");
+  const [laster, setLaster] = useState(true);
   const [epost, setEpost] = useState("");
   const [passord, setPassord] = useState("");
   const [feil, setFeil] = useState<string | null>(null);
-  const [skannepunkt, setSkannepunkt] = useState<Skannepunkt[]>([]);
-  const [arbeider, setArbeider] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        void hentSkannepunkt();
+        void stadfestTilgang();
       } else {
-        setFase("logg_inn");
+        setLaster(false);
       }
     });
     // Supabase-klienten er stabil gjennom useRef.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function hentSkannepunkt() {
-    setArbeider(true);
+  async function stadfestTilgang() {
+    setLaster(true);
     setFeil(null);
 
     const {
@@ -49,8 +36,7 @@ export function StasjonsoppsettSkjerm({ onFullfoert }: Props) {
     } = await supabase.auth.getUser();
 
     if (brukarFeil || !user) {
-      setArbeider(false);
-      setFase("logg_inn");
+      setLaster(false);
       return;
     }
 
@@ -64,34 +50,18 @@ export function StasjonsoppsettSkjerm({ onFullfoert }: Props) {
 
     if (rolleFeil || !admin) {
       await supabase.auth.signOut();
-      setArbeider(false);
-      setFeil("Kontoen har ikkje tilgang til å konfigurere skannepunkt.");
-      setFase("logg_inn");
+      setLaster(false);
+      setFeil("Kontoen har ikkje tilgang til å aktivere skanneeininga.");
       return;
     }
 
-    const { data, error } = await supabase
-      .from("skannepunkt")
-      .select("id, namn, stasjon")
-      .eq("aktiv", true)
-      .order("stasjon, namn");
-
-    setArbeider(false);
-
-    if (error) {
-      setFeil(`Klarte ikkje hente skannepunkt: ${error.message}`);
-      setFase("stasjon_val");
-      return;
-    }
-
-    setSkannepunkt((data as Skannepunkt[] | null) ?? []);
-    setFase("stasjon_val");
+    onFullfoert();
   }
 
   async function loggInn() {
-    if (arbeider || !epost || !passord) return;
+    if (laster || !epost || !passord) return;
 
-    setArbeider(true);
+    setLaster(true);
     setFeil(null);
     const { error } = await supabase.auth.signInWithPassword({
       email: epost,
@@ -99,15 +69,15 @@ export function StasjonsoppsettSkjerm({ onFullfoert }: Props) {
     });
 
     if (error) {
-      setArbeider(false);
+      setLaster(false);
       setFeil("Feil e-post eller passord.");
       return;
     }
 
-    await hentSkannepunkt();
+    await stadfestTilgang();
   }
 
-  if (fase === "laster") {
+  if (laster) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <p className="text-neutral-400">Lastar…</p>
@@ -115,92 +85,47 @@ export function StasjonsoppsettSkjerm({ onFullfoert }: Props) {
     );
   }
 
-  if (fase === "logg_inn") {
-    return (
-      <main className="flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 p-6 mx-auto">
-        <div>
-          <h1 className="text-2xl font-bold">Konfigurer skannepunkt</h1>
-          <p className="mt-1 text-sm text-neutral-400">
-            Logg inn som admin éin gong for å velje stasjon
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <input
-            type="email"
-            autoComplete="email"
-            placeholder="E-post"
-            value={epost}
-            onChange={(e) => setEpost(e.target.value)}
-            className="min-h-[48px] w-full rounded-xl bg-neutral-800 px-4 text-neutral-100 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-500"
-          />
-          <input
-            type="password"
-            autoComplete="current-password"
-            placeholder="Passord"
-            value={passord}
-            onChange={(e) => setPassord(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void loggInn();
-            }}
-            className="min-h-[48px] w-full rounded-xl bg-neutral-800 px-4 text-neutral-100 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-500"
-          />
-        </div>
-
-        {feil && <p className="text-sm text-red-400">{feil}</p>}
-
-        <button
-          type="button"
-          onClick={() => void loggInn()}
-          disabled={arbeider || !epost || !passord}
-          className="min-h-[56px] w-full rounded-xl bg-neutral-100 text-lg font-semibold text-neutral-900 disabled:opacity-40 active:bg-neutral-300"
-        >
-          {arbeider ? "Loggar inn…" : "Logg inn"}
-        </button>
-      </main>
-    );
-  }
-
   return (
-    <main className="flex min-h-screen flex-col gap-6 p-6">
+    <main className="flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 p-6 mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Vel skannepunkt</h1>
+        <h1 className="text-2xl font-bold">Aktiver skanneeining</h1>
         <p className="mt-1 text-sm text-neutral-400">
-          Dette valet blir lagra på denne eininga.
+          Logg inn som admin éin gong. Jobbkortet bestemmer operasjonen.
         </p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <input
+          type="email"
+          autoComplete="email"
+          placeholder="E-post"
+          value={epost}
+          onChange={(e) => setEpost(e.target.value)}
+          className="min-h-[48px] w-full rounded-xl bg-neutral-800 px-4 text-neutral-100 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-500"
+        />
+        <input
+          type="password"
+          autoComplete="current-password"
+          placeholder="Passord"
+          value={passord}
+          onChange={(e) => setPassord(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void loggInn();
+          }}
+          className="min-h-[48px] w-full rounded-xl bg-neutral-800 px-4 text-neutral-100 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-500"
+        />
       </div>
 
       {feil && <p className="text-sm text-red-400">{feil}</p>}
 
-      {skannepunkt.length === 0 ? (
-        <p className="text-neutral-500">
-          Ingen aktive skannepunkt funne. Opprett skannepunkt i admin-panelet
-          fyrst.
-        </p>
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {skannepunkt.map((sp) => (
-            <li key={sp.id}>
-              <button
-                type="button"
-                onClick={() =>
-                  onFullfoert({
-                    id: sp.id,
-                    namn: sp.namn,
-                    stasjon: sp.stasjon,
-                  })
-                }
-                className="min-h-[64px] w-full rounded-xl bg-neutral-800 px-5 text-left active:bg-neutral-700"
-              >
-                <span className="block text-lg font-semibold">{sp.namn}</span>
-                <span className="block text-sm text-neutral-400">
-                  {STASJON_NAMN[sp.stasjon] ?? sp.stasjon}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <button
+        type="button"
+        onClick={() => void loggInn()}
+        disabled={laster || !epost || !passord}
+        className="min-h-[56px] w-full rounded-xl bg-neutral-100 text-lg font-semibold text-neutral-900 disabled:opacity-40 active:bg-neutral-300"
+      >
+        {laster ? "Aktiverer…" : "Aktiver"}
+      </button>
     </main>
   );
 }

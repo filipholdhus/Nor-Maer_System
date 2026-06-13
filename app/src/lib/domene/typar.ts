@@ -63,6 +63,14 @@ export const KANBAN_STEG = [
   "galv",
 ] as const satisfies readonly Steg[];
 
+// Steg som den fleksible pilot-iPaden kan registrere med vanleg
+// skann_inn/skann_ut. Admin-inspeksjon og galv har eigne hendingar.
+export const FLEKSIBLE_SKANN_STEG = [
+  "kapp",
+  "sveis",
+  "kontroll",
+] as const satisfies readonly Steg[];
+
 export const ROLLE = ["operator", "sveisar", "admin", "kvalitet", "leiar"] as const;
 export type Rolle = (typeof ROLLE)[number];
 

@@ -12,6 +12,23 @@ Vedtak frå avklaringsrundane (juni 2026). Endringar frå original spec er merka
 ## Skannepunkt
 Handhaldne skannarar (keyboard-emulering) er primær-input; QR-koden sit på produksjonstegninga. Skannepunkt: **kapp**, **sveis** (1–2), **kontroll**, **galv-port** (skann ut ved sending, inn ved retur), **smådeler**. Kamera (@zxing/browser) og manuell innskriving som fallback.
 
+### Fleksibel skanneeining i pilotfasen *(mellombels vedtak 2026-06-13)*
+Piloten startar med éin iPad og éin handhalden skannar. Eininga er ikkje låst til
+ein fysisk stasjon. Etter QR-skann les appen `jobbkort.noverande_steg` og viser
+operasjonen som skal utførast. Appen sender dette steget til
+`sjekk_skann_inn()`, medan triggeren på `steg_logg` framleis handhevar rett steg,
+FIFO og éin operatør–eitt kort.
+
+Den fleksible flyten gjeld vanleg produksjonsskann for kapp, sveis og kontroll.
+Admin-inspeksjon og galv har eigne hendingar og skal ikkje behandlast som vanleg
+`skann_inn`/`skann_ut`. `skannepunkt_id` er null i pilotloggen fordi eininga
+ikkje representerer ein fast fysisk plass.
+
+Når fleire faste iPad-ar blir innførte, kan stasjonsbinding aktiverast att.
+Fordeling mellom parallelle stasjonar, til dømes Sveis 1 og Sveis 2, skal vere
+eit eige seinare vedtak basert på kø og flaskehalsdata. Jobbkortet eig framleis
+stegrekkjefølgja; stasjonsfordeling skal ikkje endre eller hoppe over steg.
+
 ## Slepp til produksjon *(nytt steg)*
 Jobbkort blir oppretta av ingeniør (modell → jobbpakker → jobbkort) med tilstand `planlagt`. Admin **slepper** kortet: QR-ark blir skrive ut, lagt på tegninga, kortet går til første steg i steg-planen. Dashbordet viser dermed heile biletet: ikkje sleppt / i produksjon / hos galv / ferdig = 100 % av modellen.
 
