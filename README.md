@@ -33,9 +33,11 @@ for f in scripts/lokal-test/00_auth_stub.sql \
          supabase/migrations/0004_storage.sql \
          supabase/migrations/0005_jobbkort_integritet.sql \
          supabase/migrations/0006_flyt_skjerping.sql \
+         supabase/migrations/0007_tilgang_skjerping.sql \
          scripts/lokal-test/01_flyt_test.sql \
          scripts/lokal-test/02_integritet_test.sql \
-         scripts/lokal-test/03_flyt_skjerping_test.sql; do
+         scripts/lokal-test/03_flyt_skjerping_test.sql \
+         scripts/lokal-test/04_tilgang_test.sql; do
   docker exec -i normaer-pg psql -v ON_ERROR_STOP=1 -U postgres -d normaer_test < "$f"
 done
 
@@ -53,10 +55,12 @@ psql -v ON_ERROR_STOP=1 -d normaer_test \
   -f supabase/migrations/0003_rls.sql \
   -f supabase/migrations/0004_storage.sql \
   -f supabase/migrations/0005_jobbkort_integritet.sql \
-  -f supabase/migrations/0006_flyt_skjerping.sql
+  -f supabase/migrations/0006_flyt_skjerping.sql \
+  -f supabase/migrations/0007_tilgang_skjerping.sql
 psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/01_flyt_test.sql
 psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/02_integritet_test.sql
 psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/03_flyt_skjerping_test.sql
+psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/04_tilgang_test.sql
 ```
 
 Forventa: «OK:»-linjer + «ALLE TESTAR PASSERTE» i begge testfilene.

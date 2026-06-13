@@ -48,7 +48,7 @@ jobs:
             -f scripts/lokal-test/00_auth_stub.sql \
             -f scripts/lokal-test/00_storage_stub.sql
 
-      - name: Køyr migrasjonar 0001–0006
+      - name: Køyr migrasjonar 0001–0007
         run: |
           psql -v ON_ERROR_STOP=1 \
             -f supabase/migrations/0001_grunnskjema.sql \
@@ -56,7 +56,8 @@ jobs:
             -f supabase/migrations/0003_rls.sql \
             -f supabase/migrations/0004_storage.sql \
             -f supabase/migrations/0005_jobbkort_integritet.sql \
-            -f supabase/migrations/0006_flyt_skjerping.sql
+            -f supabase/migrations/0006_flyt_skjerping.sql \
+            -f supabase/migrations/0007_tilgang_skjerping.sql
 
       - name: Køyr flyt-testar (01)
         run: |
@@ -72,3 +73,8 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 \
             -f scripts/lokal-test/03_flyt_skjerping_test.sql
+
+      - name: Køyr tilgang-testar (04)
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -f scripts/lokal-test/04_tilgang_test.sql

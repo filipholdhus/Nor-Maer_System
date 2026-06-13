@@ -15,6 +15,16 @@ Handhaldne skannarar (keyboard-emulering) er primær-input; QR-koden sit på pro
 ## Slepp til produksjon *(nytt steg)*
 Jobbkort blir oppretta av ingeniør (modell → jobbpakker → jobbkort) med tilstand `planlagt`. Admin **slepper** kortet: QR-ark blir skrive ut, lagt på tegninga, kortet går til første steg i steg-planen. Dashbordet viser dermed heile biletet: ikkje sleppt / i produksjon / hos galv / ferdig = 100 % av modellen.
 
+### Roller per steg_logg-hending
+For å unngå at RLS og Server Actions glir frå kvarandre er kvar admin-hending bunde til éin rolleliste, både i RLS-policy og i Server Action:
+
+| Hending | Rolle | Grunngjeving |
+| --- | --- | --- |
+| `sleppt` | admin, leiar | Slepp er ein produksjonsplanleggingsavgjerd — kvalitet skal sjekke, ikkje frigi |
+| `godkjent` | admin, leiar, kvalitet | Kvalitet er sjølve godkjenningsinstansen i ISO 3834 |
+| `sendt_tilbake` | admin, leiar, kvalitet | Same rolleliste som godkjent — same instans tek òg avvisingsavgjerda |
+| `skann_inn` / `skann_ut` / `skann_avvist` / `sendt_galv` / `motteke_galv` | alle innlogga (skannepunkt) | Golvarbeid, handheva av FIFO og éin-operatør-trigger |
+
 ## Steg-plan per jobbkort *(endring frå fast løype)*
 Ingeniøren set løypa per kort i admin. Standard: kapp → sveis → kontroll → admin_inspeksjon → galv. Smådel utan sveis kan t.d. ha kapp → galv. `sendt_tilbake` kan berre gå til steg som finst i planen, og målsteget må ligge **før** noverande steg (ingen hopp framover via rework-mekanismen). Ferdige kort kan aldri reopnast — produktet kan ha forlate huset, og audit-sporet skal forbli rein. Steg_plan kan berre innehalde kjende stegnamn (`kapp`, `sveis`, `kontroll`, `admin_inspeksjon`, `galv`) — handheva som CHECK-constraint på `jobbkort`.
 

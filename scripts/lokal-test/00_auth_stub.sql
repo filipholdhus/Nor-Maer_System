@@ -17,3 +17,13 @@ do $$ begin
   create role authenticated;
 exception when duplicate_object then null;
 end $$;
+
+-- I Supabase får rolla "authenticated" automatisk SELECT/INSERT/UPDATE/DELETE-grants
+-- på public via plattformen. Når vi køyrer mot rein Postgres må vi gjere dette
+-- eksplisitt slik at RLS-testar (SET ROLE authenticated) treffer RLS i staden
+-- for å feile på rein permission-denied.
+grant usage on schema public to authenticated;
+alter default privileges in schema public
+  grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public
+  grant usage, select on sequences to authenticated;
