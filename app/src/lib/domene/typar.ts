@@ -45,6 +45,11 @@ export type Hending = (typeof HENDING)[number];
 export const ROLLE = ["operator", "sveisar", "admin", "kvalitet", "leiar"] as const;
 export type Rolle = (typeof ROLLE)[number];
 
+export const ADMIN_ROLLAR: Rolle[] = ["admin", "leiar", "kvalitet"];
+
+// Vekttoleranse — must match valider_alle_pakkar_vekt() in the database
+export const VEKT_TOLERANSE = 0.02;
+
 export const ROLLE_NAMN: Record<Rolle, string> = {
   operator: "Operatør",
   sveisar: "Sveisar",
