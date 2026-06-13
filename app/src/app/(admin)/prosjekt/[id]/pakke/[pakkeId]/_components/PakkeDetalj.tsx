@@ -244,10 +244,17 @@ export function PakkeDetalj({
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-    const storagePath = `${kortId}/tegning.pdf`;
+
+    // Versjonert filnamn — aldri overskriv. Sjølv om noko feilar etter
+    // opplasting, ligg gamle fila urørt og kortet har framleis ei gyldig
+    // tegning_pdf_url. Ny fil blir berre "lekkasje" som kan ryddast manuelt.
+    const eksisterandeUrl =
+      jobbkort.find((k) => k.id === kortId)?.tegning_pdf_url ?? null;
+    const nyttFilnamn = `${kortId}/tegning-${Date.now()}.pdf`;
+
     const { error: uploadError } = await supabase.storage
       .from("tegningar")
-      .upload(storagePath, fil, { upsert: true });
+      .upload(nyttFilnamn, fil);
 
     if (uploadError) {
       setUploadFeil(uploadError.message);
@@ -255,27 +262,48 @@ export function PakkeDetalj({
       return;
     }
 
-    const res = await oppdaterTegningUrl(kortId, pakke.id, prosjektId, storagePath);
+    const res = await oppdaterTegningUrl(kortId, pakke.id, prosjektId, nyttFilnamn);
     if (!res.ok) {
-      // Metadataoppdatering feila — slett opplasta fil for å unngå foreldrelaus fil
-      await supabase.storage.from("tegningar").remove([storagePath]);
+      // Metadataoppdatering feila — rull tilbake ved å slette nyutlasta fil.
+      // Den gamle fila + URL er framleis intakt på jobbkortet.
+      await supabase.storage.from("tegningar").remove([nyttFilnamn]);
       setUploadFeil(res.feil);
-    } else {
-      router.refresh();
+      setUploadPending(false);
+      setUploadKortId(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+
+    // Suksess — no, og berre no, kan vi slette gamle fila.
+    if (eksisterandeUrl && eksisterandeUrl !== nyttFilnamn) {
+      const { error: delError } = await supabase.storage
+        .from("tegningar")
+        .remove([eksisterandeUrl]);
+      if (delError) {
+        // Sletting feila, men ny fil er på plass og URL er oppdatert.
+        // Loggar berre — brukar treng ikkje sjå dette.
+        console.warn("Klarte ikkje slette gammal teikning:", delError);
+      }
+    }
+    router.refresh();
     setUploadPending(false);
     setUploadKortId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function opneTegning(kortId: string) {
+    const url = jobbkort.find((k) => k.id === kortId)?.tegning_pdf_url;
+    if (!url) {
+      setUploadFeil("Kortet har inga teikning.");
+      return;
+    }
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const { data, error } = await supabase.storage
       .from("tegningar")
-      .createSignedUrl(`${kortId}/tegning.pdf`, 3600);
+      .createSignedUrl(url, 3600);
     if (error) {
       setUploadFeil(error.message);
       return;
