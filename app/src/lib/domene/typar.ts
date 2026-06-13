@@ -42,13 +42,31 @@ export const HENDING = [
 ] as const;
 export type Hending = (typeof HENDING)[number];
 
+export const HENDING_NAMN: Record<Hending, string> = {
+  sleppt: "Sleppt til produksjon",
+  skann_inn: "Skanna inn",
+  skann_ut: "Skanna ut",
+  skann_avvist: "Avvist (FIFO)",
+  sendt_tilbake: "Sendt tilbake",
+  godkjent: "Godkjent",
+  sendt_galv: "Sendt til galv",
+  motteke_galv: "Motteke frå galv",
+};
+
+// Steg som har fysiske stasjonar og dermed eigne kolonnar i admin-kanban.
+// (planlagt + ferdig er virtuelle tilstandar — utan stasjon, utan kolonne.)
+export const KANBAN_STEG = [
+  "kapp",
+  "sveis",
+  "kontroll",
+  "admin_inspeksjon",
+  "galv",
+] as const satisfies readonly Steg[];
+
 export const ROLLE = ["operator", "sveisar", "admin", "kvalitet", "leiar"] as const;
 export type Rolle = (typeof ROLLE)[number];
 
 export const ADMIN_ROLLAR: Rolle[] = ["admin", "leiar", "kvalitet"];
-
-// Vekttoleranse — must match valider_alle_pakkar_vekt() in the database
-export const VEKT_TOLERANSE = 0.02;
 
 export const ROLLE_NAMN: Record<Rolle, string> = {
   operator: "Operatør",

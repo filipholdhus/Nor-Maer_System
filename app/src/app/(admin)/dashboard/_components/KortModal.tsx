@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { STEG_NAMN } from "@/lib/domene/typar";
+import { STEG_NAMN, HENDING_NAMN } from "@/lib/domene/typar";
+import type { Hending } from "@/lib/domene/typar";
 import { godkjennJobbkort, sendTilbake } from "../actions";
 
 type KortDetalj = {
@@ -40,17 +41,6 @@ type LoggRad = {
   kommentar: string | null;
   sendt_tilbake_til_steg: string | null;
   brukar: { namn: string } | null;
-};
-
-const HENDING_TEKST: Record<string, string> = {
-  sleppt: "Sleppt til produksjon",
-  skann_inn: "Skanna inn",
-  skann_ut: "Skanna ut",
-  skann_avvist: "Avvist (FIFO)",
-  sendt_tilbake: "Sendt tilbake",
-  godkjent: "Godkjent",
-  sendt_galv: "Sendt til galv",
-  motteke_galv: "Motteke frå galv",
 };
 
 function formaterDato(iso: string) {
@@ -200,7 +190,7 @@ function HendingsLogg({ logg }: { logg: LoggRad[] }) {
                     : "var(--nm-text-1)",
               }}
             >
-              {HENDING_TEKST[h.hending] ?? h.hending}
+              {HENDING_NAMN[h.hending as Hending] ?? h.hending}
             </span>
             <span
               style={{ fontSize: 11, color: "var(--nm-text-3)", marginLeft: 6 }}

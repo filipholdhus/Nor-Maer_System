@@ -62,9 +62,14 @@ export default async function PakkeDetaljSidePage({
 
   if (!rawPakke) notFound();
 
+  // Bandet pakke→prosjekt MÅ matche id-en i URL-en. Elles kan ein bytt prosjekt-id-en
+  // i URL-en og lure seg sjølv til å tru ein ser ei pakke som høyrer til eit anna prosjekt.
+  const pakke = rawPakke as unknown as PakkeFull;
+  if (pakke.prosjekt?.id !== id) notFound();
+
   return (
     <PakkeDetalj
-      pakke={rawPakke as unknown as PakkeFull}
+      pakke={pakke}
       jobbkort={(rawJobbkort ?? []) as JobbkortRad[]}
       vektValidering={(vektRaw as VektValidering | null) ?? null}
       prosjektId={id}

@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/lib/supabase/server";
+import { KANBAN_STEG } from "@/lib/domene/typar";
 import { DashboardKlient } from "./_components/DashboardKlient";
 
 export type ProsjektInfo = {
@@ -67,7 +68,7 @@ export default async function DashboardSide() {
       .select(
         "id, jobbkort_nr, beskriving, noverande_steg, noverande_status, rework_runde, fifo_nr, aktiv_brukar_id, steg_plan, jobbpakke:jobbpakke_id(rekkefoelge, pakke_nr, prosjekt_id)"
       )
-      .in("noverande_steg", ["kapp", "sveis", "kontroll", "admin_inspeksjon", "galv"])
+      .in("noverande_steg", [...KANBAN_STEG])
       .order("fifo_nr"),
 
     supabase.from("avvik").select("jobbkort_id").eq("status", "open"),

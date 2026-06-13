@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { STEG_NAMN, HENDING } from "@/lib/domene/typar";
+import { STEG_NAMN, HENDING_NAMN, KANBAN_STEG } from "@/lib/domene/typar";
+import type { Hending } from "@/lib/domene/typar";
 import type {
   FeedHending,
   KanbanKort,
@@ -10,25 +11,6 @@ import type {
   ProsjektInfo,
 } from "../page";
 import { KortModal } from "./KortModal";
-
-const KANBAN_STEG = [
-  "kapp",
-  "sveis",
-  "kontroll",
-  "admin_inspeksjon",
-  "galv",
-] as const;
-
-const HENDING_TEKST: Record<string, string> = {
-  [HENDING[0]]: "sleppte",         // sleppt
-  [HENDING[1]]: "skanna inn",      // skann_inn
-  [HENDING[2]]: "skanna ut",       // skann_ut
-  [HENDING[3]]: "avvist skann",    // skann_avvist
-  [HENDING[4]]: "sende tilbake",   // sendt_tilbake
-  [HENDING[5]]: "godkjente",       // godkjent
-  [HENDING[6]]: "sende til galv",  // sendt_galv
-  [HENDING[7]]: "mottok frå galv", // motteke_galv
-};
 
 type Filter = { prosjektId: string | null; steg: string | null };
 
@@ -475,7 +457,7 @@ function FeedSone({
             <div
               style={{ fontSize: 11, color: "var(--nm-text-2)", lineHeight: 1.4 }}
             >
-              {HENDING_TEKST[h.hending] ?? h.hending}{" "}
+              {HENDING_NAMN[h.hending as Hending] ?? h.hending}{" "}
               {h.jobbkort && (
                 <span
                   className="font-nm-mono"
@@ -521,9 +503,6 @@ function byggInnTidMap(
   }
   return tidMap;
 }
-
-// ── Kanban-steg (konstant select-liste for spørring) ─────────────
-const KANBAN_STEG_LIST = ["kapp", "sveis", "kontroll", "admin_inspeksjon", "galv"] as const;
 
 // ── Main component ────────────────────────────────────────────────
 
@@ -577,7 +556,7 @@ export function DashboardKlient({
           .select(
             "id, jobbkort_nr, beskriving, noverande_steg, noverande_status, rework_runde, fifo_nr, aktiv_brukar_id, steg_plan, jobbpakke:jobbpakke_id(rekkefoelge, pakke_nr, prosjekt_id)"
           )
-          .in("noverande_steg", [...KANBAN_STEG_LIST])
+          .in("noverande_steg", [...KANBAN_STEG])
           .order("fifo_nr"),
         sb.from("avvik").select("jobbkort_id").eq("status", "open"),
         // Inkluder steg for korrekt inn_tid-matching ved rework

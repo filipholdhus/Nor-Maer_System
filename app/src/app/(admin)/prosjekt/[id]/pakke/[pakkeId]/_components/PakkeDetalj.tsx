@@ -10,7 +10,7 @@ import {
   oppdaterTegningUrl,
   sleppJobbkort,
 } from "../../../../actions";
-import { STANDARD_STEG_PLAN, STEG_NAMN, VEKT_TOLERANSE } from "@/lib/domene/typar";
+import { STANDARD_STEG_PLAN, STEG_NAMN } from "@/lib/domene/typar";
 import type { PakkeFull, JobbkortRad } from "../page";
 import type { VektValidering } from "../../../page";
 
@@ -47,8 +47,10 @@ function VektBadge({ v }: { v: VektValidering | null | undefined }) {
   );
 }
 
-// Live weight preview based on current jobbkort list + pending edit value
-function EstimertVektBadge({
+// Sum-preview etter redigering — INGEN toleranse-vurdering i klient.
+// Toleranse-regelen bur i databasen (valider_alle_pakkar_vekt). Etter
+// lagring blir VektBadge oppdatert med RPC-svaret som er autoritativt.
+function SumPreview({
   planlagt_kg,
   jobbkort,
   redigerKortId,
@@ -68,20 +70,10 @@ function EstimertVektBadge({
   const sumAndre = andreKort.reduce((s, k) => s + (k.vekt_kg ?? 0), 0);
   const tillegg = nyVekt ? parseFloat(nyVekt) || 0 : 0;
   const sum = sumAndre + tillegg;
-  const avvik = Math.abs(sum - planlagt_kg) / planlagt_kg;
-  const ok = avvik <= VEKT_TOLERANSE;
 
-  if (ok) {
-    return (
-      <span className="nm-vekt-ok">
-        ✓ {sum.toFixed(1)} / {planlagt_kg.toFixed(1)} kg
-      </span>
-    );
-  }
   return (
-    <span className="nm-vekt-feil">
-      ✕ {(avvik * 100).toFixed(1)}% avvik ({sum.toFixed(1)} /{" "}
-      {planlagt_kg.toFixed(1)} kg)
+    <span style={{ color: "var(--nm-text-2)" }}>
+      {sum.toFixed(1)} / {planlagt_kg.toFixed(1)} kg
     </span>
   );
 }
@@ -743,7 +735,7 @@ export function PakkeDetalj({
               >
                 Pakke etter endring:
               </span>
-              <EstimertVektBadge
+              <SumPreview
                 planlagt_kg={pakke.total_vekt_planlagt_kg}
                 jobbkort={jobbkort}
                 redigerKortId={redigerKortId}

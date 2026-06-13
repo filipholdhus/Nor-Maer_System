@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import QRCode from "qrcode";
 import { supabaseServer } from "@/lib/supabase/server";
+import { STEG_NAMN } from "@/lib/domene/typar";
 import { SkrivUtKnapp } from "./_components/SkrivUtKnapp";
 
 export default async function SkriverkSidePage({
@@ -40,18 +41,26 @@ export default async function SkriverkSidePage({
 
   if (!rawPakke || !rawKort || rawKort.length === 0) notFound();
 
-  // Sikre at alle kortIDs faktisk høyrer til denne pakka og prosjektet
+  type Pakke = {
+    pakke_nr: string;
+    prosjekt: { id: string; prosjekt_nr: string } | null;
+  };
+  const pakke = rawPakke as unknown as Pakke;
+
+  // Bandet pakke→prosjekt skal vere det i URL-en — elles er nokon ute og bablar
+  if (pakke.prosjekt?.id !== prosjektId) notFound();
+
+  // Alle etterspurde kort må vere returnerte (delvis match = ikkje OK, eitt eller
+  // fleire av kort-ID-ane høyrer ikkje til noko vi har lov å sjå).
+  if (rawKort.length !== kortIds.length) notFound();
+
+  // Kvart returnerte kort må høyre til pakka i URL-en
   type RawKort = { id: string; jobbpakke_id: string };
   const ugyldig = (rawKort as unknown as RawKort[]).some(
     (k) => k.jobbpakke_id !== pakkeId
   );
   if (ugyldig) notFound();
 
-  type Pakke = {
-    pakke_nr: string;
-    prosjekt: { id: string; prosjekt_nr: string } | null;
-  };
-  const pakke = rawPakke as unknown as Pakke;
   const prosjektNr = pakke.prosjekt?.prosjekt_nr ?? prosjektId;
 
   // Generate QR SVGs server-side — one per jobbkort
@@ -144,14 +153,6 @@ type QrKortProps = {
   sist: boolean;
 };
 
-const STEG_ETIKETT: Record<string, string> = {
-  kapp: "Kapp",
-  sveis: "Sveis",
-  kontroll: "Kontroll",
-  admin_inspeksjon: "Adm.insp.",
-  galv: "Galv",
-};
-
 function QrKort({
   jobbkort_nr,
   beskriving,
@@ -242,7 +243,7 @@ function QrKort({
           <Rad
             label="Steg-plan"
             verdi={steg_plan
-              .map((s) => STEG_ETIKETT[s] ?? s)
+              .map((s) => STEG_NAMN[s as keyof typeof STEG_NAMN] ?? s)
               .join(" → ")}
           />
         </tbody>
