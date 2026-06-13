@@ -34,7 +34,9 @@ psql -d normaer_test -f scripts/lokal-test/00_auth_stub.sql \
   -f supabase/migrations/0001_grunnskjema.sql \
   -f supabase/migrations/0002_flytlogikk.sql \
   -f supabase/migrations/0003_rls.sql \
-  && psql -d normaer_test -f scripts/lokal-test/01_flyt_test.sql
+  -f supabase/migrations/0005_jobbkort_integritet.sql \
+  && psql -d normaer_test -f scripts/lokal-test/01_flyt_test.sql \
+  && psql -d normaer_test -f scripts/lokal-test/02_integritet_test.sql
 # Forventa: alle "OK:"-linjer + "ALLE TESTAR PASSERTE". Databasen kan droppast/gjenskapast fritt.
 
 # 2. Frontend:
