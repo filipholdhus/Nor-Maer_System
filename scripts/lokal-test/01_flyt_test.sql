@@ -158,11 +158,10 @@ do $$ begin
   raise notice 'OK: skann ut flytta kortet til neste steg i planen (sveis)';
 end $$;
 
--- ---- Sveis: inn, mottakskontroll finn feil → avvik + sendt tilbake ----
-insert into steg_logg (jobbkort_id, steg, hending, brukar_id)
-values ('50000000-0000-0000-0000-000000000001', 'sveis', 'skann_inn',
-        '10000000-0000-0000-0000-000000000003');
-
+-- ---- Sveis: mottakskontroll FØR skann inn finn feil → avvik + sendt tilbake ----
+-- Frå 0008 må sendt_tilbake skje frå venter, ikkje paagaar. Sveisaren ser
+-- feilen før skanninga (visuell mottakskontroll), registrerer avvik, og
+-- admin sender kortet tilbake mens det framleis er sveis/venter.
 insert into avvik (jobbkort_id, oppdaga_paa_steg, oppdaga_ved, aarsak_steg, aarsakskode,
                    kommentar, opprettet_av)
 values ('50000000-0000-0000-0000-000000000001', 'sveis', 'skann_inn', 'kapp', 'feil_maal',
@@ -170,7 +169,7 @@ values ('50000000-0000-0000-0000-000000000001', 'sveis', 'skann_inn', 'kapp', 'f
 
 insert into steg_logg (jobbkort_id, steg, hending, brukar_id, sendt_tilbake_til_steg, kommentar)
 values ('50000000-0000-0000-0000-000000000001', 'sveis', 'sendt_tilbake',
-        '10000000-0000-0000-0000-000000000003', 'kapp', 'Feil mål oppdaga ved mottak');
+        '10000000-0000-0000-0000-000000000001', 'kapp', 'Feil mål oppdaga ved mottak');
 
 do $$ begin
   if (select noverande_steg || '/' || rework_runde::text from jobbkort

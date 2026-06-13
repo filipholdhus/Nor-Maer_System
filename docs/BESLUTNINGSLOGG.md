@@ -26,7 +26,10 @@ For å unngå at RLS og Server Actions glir frå kvarandre er kvar admin-hending
 | `skann_inn` / `skann_ut` / `skann_avvist` / `sendt_galv` / `motteke_galv` | alle innlogga (skannepunkt) | Golvarbeid, handheva av FIFO og éin-operatør-trigger |
 
 ## Steg-plan per jobbkort *(endring frå fast løype)*
-Ingeniøren set løypa per kort i admin. Standard: kapp → sveis → kontroll → admin_inspeksjon → galv. Smådel utan sveis kan t.d. ha kapp → galv. `sendt_tilbake` kan berre gå til steg som finst i planen, og målsteget må ligge **før** noverande steg (ingen hopp framover via rework-mekanismen). Ferdige kort kan aldri reopnast — produktet kan ha forlate huset, og audit-sporet skal forbli rein. Steg_plan kan berre innehalde kjende stegnamn (`kapp`, `sveis`, `kontroll`, `admin_inspeksjon`, `galv`) — handheva som CHECK-constraint på `jobbkort`.
+Ingeniøren set løypa per kort i admin. Standard: kapp → sveis → kontroll → admin_inspeksjon → galv. Smådel utan sveis kan t.d. ha kapp → galv. `sendt_tilbake` kan berre gå til steg som finst i planen, og målsteget må ligge **før** noverande steg (ingen hopp framover via rework-mekanismen). Ferdige kort kan aldri reopnast — produktet kan ha forlate huset, og audit-sporet skal forbli rein. Steg_plan kan berre innehalde kjende stegnamn (`kapp`, `sveis`, `kontroll`, `admin_inspeksjon`, `galv`), og ingen duplikat — handheva som CHECK-constraint + trigger på `jobbkort`.
+
+### Mottakskontroll — avvik FØR skann inn *(strammare 2026-06-13)*
+Når sveisar/kontrollør ser feil på arbeidet frå førre stasjon, blir avviket registrert FØR skann inn. Kortet er då i venter-status, og admin/kvalitet sender det tilbake. Dette unngår at eit kort blir "stelast" frå ein operatør som er midt i arbeidet (paagaar), og bevarer audit-sporet om kven som faktisk handterte kortet. `sendt_tilbake` krev difor `noverande_status = 'venter'` — er kortet paagaar, må operatøren skann ut først.
 
 ## FIFO — hard handheving
 - Nivå 1: `jobbpakke.rekkefoelge` (heile pakka prioriterast, aldri enkeltkort).

@@ -363,10 +363,13 @@ export function KortModal({
       )
     : [];
 
+  // Frå migrasjon 0008: sendt_tilbake krev noverande_status = 'venter'.
+  // Operatøren skal aldri få kortet stelast frå seg utan skann ut først.
   const kanSendeTilbake =
     kort &&
     kort.noverande_steg !== "planlagt" &&
     kort.noverande_steg !== "ferdig" &&
+    kort.noverande_status === "venter" &&
     stegFoerNoverande.length > 0;
 
   return (
