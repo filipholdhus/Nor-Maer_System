@@ -281,9 +281,13 @@ export function PakkeDetalj({
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-    const { data } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from("tegningar")
       .createSignedUrl(`${kortId}/tegning.pdf`, 3600);
+    if (error) {
+      setUploadFeil(error.message);
+      return;
+    }
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
   }
 

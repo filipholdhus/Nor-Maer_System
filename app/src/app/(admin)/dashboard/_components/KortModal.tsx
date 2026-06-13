@@ -298,7 +298,8 @@ export function KortModal({
             .order("tidsstempel", { ascending: false }),
         ]);
         if (avbroten) return;
-        if (kortRes.error) throw new Error(kortRes.error.message);
+        const dataFeil = kortRes.error ?? stegTidRes.error ?? loggRes.error;
+        if (dataFeil) throw new Error(dataFeil.message);
         setKort(kortRes.data as unknown as KortDetalj);
         setStegTider((stegTidRes.data ?? []) as unknown as StegTid[]);
         setLogg((loggRes.data ?? []) as unknown as LoggRad[]);
@@ -320,9 +321,13 @@ export function KortModal({
   async function opneTegning() {
     if (!kort?.tegning_pdf_url) return;
     const sb = supabaseBrowser();
-    const { data } = await sb.storage
+    const { data, error } = await sb.storage
       .from("tegningar")
       .createSignedUrl(kort.tegning_pdf_url, 3600);
+    if (error) {
+      setAksjonfeil(error.message);
+      return;
+    }
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
   }
 
