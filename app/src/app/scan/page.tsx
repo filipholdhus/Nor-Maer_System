@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useState } from "react";
+import { useMemo, useSyncExternalStore, useState } from "react";
 import { StasjonsoppsettSkjerm } from "@/components/scan/StasjonsoppsettSkjerm";
 import {
   InnloggingSkjerm,
@@ -26,23 +26,29 @@ function subscribe(cb: () => void) {
   };
 }
 
-function getSnapshot(): LagretStasjon | null {
-  const raw = localStorage.getItem(STASJON_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as LagretStasjon;
-  } catch {
-    return null;
-  }
+function getSnapshot(): string | null {
+  return localStorage.getItem(STASJON_KEY);
 }
 
 export default function ScanSide() {
   // undefined = server snapshot (hydration guard before localStorage is read)
-  const stasjon = useSyncExternalStore(subscribe, getSnapshot, () => undefined);
+  const lagretStasjon = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => undefined
+  );
+  const stasjon = useMemo(() => {
+    if (!lagretStasjon) return null;
+    try {
+      return JSON.parse(lagretStasjon) as LagretStasjon;
+    } catch {
+      return null;
+    }
+  }, [lagretStasjon]);
   const [visOppsett, setVisOppsett] = useState(false);
   const [brukar, setBrukar] = useState<InnloggaBrukar | null>(null);
 
-  if (stasjon === undefined) return null;
+  if (lagretStasjon === undefined) return null;
 
   // ── Stasjonsoppsett ────────────────────────────────────────────────────────
   if (stasjon === null || visOppsett) {
