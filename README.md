@@ -63,5 +63,5 @@ psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/03_flyt_skjerping_
 psql -v ON_ERROR_STOP=1 -d normaer_test -f scripts/lokal-test/04_tilgang_test.sql
 ```
 
-Forventa: «OK:»-linjer + «ALLE TESTAR PASSERTE» i begge testfilene.
+Forventa: «OK:»-linjer + «ALLE TESTAR PASSERTE» i alle testfilene.
 Testane rullar tilbake eigne data (transaksjonsbasert).

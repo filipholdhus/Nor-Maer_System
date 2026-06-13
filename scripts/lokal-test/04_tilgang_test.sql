@@ -33,7 +33,8 @@ insert into jobbpakke (id, pakke_nr, prosjekt_id, beskriving, total_vekt_planlag
    '30000000-0000-0000-0000-00000000d001', 'RLS-test', 100, 1);
 insert into jobbkort (id, jobbkort_nr, jobbpakke_id, beskriving, vekt_kg, antal, steg_plan) values
   ('50000000-0000-0000-0000-00000000d001', '2026-RLS-001',
-   '40000000-0000-0000-0000-00000000d001', 'Kort A', 50, 1, array['kapp','galv']),
+   '40000000-0000-0000-0000-00000000d001', 'Kort A', 50, 1,
+   array['kapp','admin_inspeksjon','galv']),
   ('50000000-0000-0000-0000-00000000d002', '2026-RLS-002',
    '40000000-0000-0000-0000-00000000d001', 'Kort B', 50, 1, array['kapp','galv']);
 
@@ -51,9 +52,10 @@ do $$ begin
           '10000000-0000-0000-0000-00000000d003');
   raise exception 'FEIL: kvalitet fekk sleppe via RLS';
 exception
-  when others then
-    if sqlerrm like 'FEIL:%' then raise; end if;
+  when insufficient_privilege then
     raise notice 'OK: RLS nektar kvalitet å sleppe (%)', sqlerrm;
+  when others then
+    raise exception 'FEIL: kvalitet-slepp feila av feil grunn: %', sqlerrm;
 end $$;
 
 reset role;
@@ -68,9 +70,10 @@ do $$ begin
           '10000000-0000-0000-0000-00000000d004');
   raise exception 'FEIL: operatør fekk sleppe via RLS';
 exception
-  when others then
-    if sqlerrm like 'FEIL:%' then raise; end if;
+  when insufficient_privilege then
     raise notice 'OK: RLS nektar operatør å sleppe (%)', sqlerrm;
+  when others then
+    raise exception 'FEIL: operatør-slepp feila av feil grunn: %', sqlerrm;
 end $$;
 
 reset role;
@@ -113,6 +116,11 @@ end $$;
 -- 'godkjent' krev admin/leiar/kvalitet (operatør nektast)
 -- =============================================================
 
+-- Domenemessig gyldig tilstand: utan RLS ville hendinga blitt godteken.
+update jobbkort
+set noverande_steg = 'admin_inspeksjon', noverande_status = 'venter'
+where id = '50000000-0000-0000-0000-00000000d001';
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000d04', true);
 
@@ -122,32 +130,69 @@ do $$ begin
           '10000000-0000-0000-0000-00000000d004');
   raise exception 'FEIL: operatør fekk registrere godkjent';
 exception
-  when others then
-    if sqlerrm like 'FEIL:%' then raise; end if;
+  when insufficient_privilege then
     raise notice 'OK: RLS nektar operatør å registrere godkjent (%)', sqlerrm;
+  when others then
+    raise exception 'FEIL: operatør-godkjenning feila av feil grunn: %', sqlerrm;
 end $$;
 
 reset role;
+
+-- kvalitet skal få lov
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000d03', true);
+
+insert into steg_logg (jobbkort_id, steg, hending, brukar_id)
+values ('50000000-0000-0000-0000-00000000d001', 'admin_inspeksjon', 'godkjent',
+        '10000000-0000-0000-0000-00000000d003');
+
+reset role;
+
+do $$ begin
+  if (select noverande_steg from jobbkort where id = '50000000-0000-0000-0000-00000000d001') <> 'galv' then
+    raise exception 'FEIL: kvalitet-godkjenning flytta ikkje kortet til galv';
+  end if;
+  raise notice 'OK: kvalitet kan registrere godkjent';
+end $$;
 
 -- =============================================================
 -- 'sendt_tilbake' krev admin/leiar/kvalitet (operatør nektast)
 -- =============================================================
 
+-- Domenemessig gyldig tilstand: galv → kapp er bakover i steg-planen.
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000d04', true);
 
 do $$ begin
   insert into steg_logg (jobbkort_id, steg, hending, brukar_id, sendt_tilbake_til_steg)
-  values ('50000000-0000-0000-0000-00000000d001', 'kapp', 'sendt_tilbake',
-          '10000000-0000-0000-0000-00000000d004', 'planlagt');
+  values ('50000000-0000-0000-0000-00000000d001', 'galv', 'sendt_tilbake',
+          '10000000-0000-0000-0000-00000000d004', 'kapp');
   raise exception 'FEIL: operatør fekk sende tilbake';
 exception
-  when others then
-    if sqlerrm like 'FEIL:%' then raise; end if;
+  when insufficient_privilege then
     raise notice 'OK: RLS nektar operatør å sende tilbake (%)', sqlerrm;
+  when others then
+    raise exception 'FEIL: operatør-retur feila av feil grunn: %', sqlerrm;
 end $$;
 
 reset role;
+
+-- kvalitet skal få lov
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000d03', true);
+
+insert into steg_logg (jobbkort_id, steg, hending, brukar_id, sendt_tilbake_til_steg)
+values ('50000000-0000-0000-0000-00000000d001', 'galv', 'sendt_tilbake',
+        '10000000-0000-0000-0000-00000000d003', 'kapp');
+
+reset role;
+
+do $$ begin
+  if (select noverande_steg from jobbkort where id = '50000000-0000-0000-0000-00000000d001') <> 'kapp' then
+    raise exception 'FEIL: kvalitet-retur flytta ikkje kortet til kapp';
+  end if;
+  raise notice 'OK: kvalitet kan registrere sendt_tilbake';
+end $$;
 
 -- =============================================================
 -- Storage: tegningar-bucket har serverside MIME/storleik
