@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { loggUt } from "@/lib/auth";
 import { ROLLE_NAMN } from "@/lib/domene/typar";
 import type { Rolle } from "@/lib/domene/typar";
@@ -129,6 +130,41 @@ function IkonTannhjul() {
 
 // ── Navigation structure ──────────────────────────────────────────
 
+function IkonMeny() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    >
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="17" x2="20" y2="17" />
+    </svg>
+  );
+}
+
+function IkonLukk() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+    >
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
+  );
+}
+
 interface NavItem {
   href: string;
   label: string;
@@ -175,15 +211,42 @@ const NAVIGASJON: NavSeksjon[] = [
 
 export function AdminSkal({ brukarNamn, brukarRolle, children }: Props) {
   const pathname = usePathname();
+  const [menyOpen, setMenyOpen] = useState(false);
 
   return (
     <div
-      className="flex h-screen overflow-hidden"
+      className="nm-admin-skal"
       style={{ background: "var(--nm-bg)" }}
     >
+      <header className="nm-mobil-toppfelt">
+        <button
+          type="button"
+          className="nm-mobil-menyknapp"
+          onClick={() => setMenyOpen(true)}
+          aria-label="Opne meny"
+          aria-expanded={menyOpen}
+        >
+          <IkonMeny />
+        </button>
+        <div className="nm-mobil-merke">
+          <div className="nm-merkeikon">NM</div>
+          <span>Nor-Mær</span>
+        </div>
+        <span className="nm-mobil-brukar">{brukarNamn}</span>
+      </header>
+
+      {menyOpen && (
+        <button
+          type="button"
+          className="nm-meny-bakgrunn"
+          onClick={() => setMenyOpen(false)}
+          aria-label="Lukk meny"
+        />
+      )}
+
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <nav
-        className="flex flex-col shrink-0 h-full"
+        className={`nm-sidebar ${menyOpen ? "nm-sidebar-open" : ""}`}
         style={{
           width: "var(--nm-sidebar-w)",
           background: "var(--nm-surface-1)",
@@ -213,6 +276,14 @@ export function AdminSkal({ brukarNamn, brukarRolle, children }: Props) {
           >
             Nor-Mær
           </span>
+          <button
+            type="button"
+            className="nm-sidebar-lukk"
+            onClick={() => setMenyOpen(false)}
+            aria-label="Lukk meny"
+          >
+            <IkonLukk />
+          </button>
         </div>
 
         {/* Nav */}
@@ -234,6 +305,7 @@ export function AdminSkal({ brukarNamn, brukarRolle, children }: Props) {
                     key={item.href}
                     href={item.href}
                     className={`nm-nav-item ${aktiv ? "nm-nav-aktiv" : ""}`}
+                    onClick={() => setMenyOpen(false)}
                   >
                     <span className="nm-nav-icon shrink-0">{item.icon}</span>
                     {item.label}
@@ -280,7 +352,7 @@ export function AdminSkal({ brukarNamn, brukarRolle, children }: Props) {
 
       {/* ── Main content ────────────────────────────────────────── */}
       <main
-        className="flex-1 overflow-y-auto"
+        className="nm-admin-innhald"
         style={{ background: "var(--nm-bg)" }}
       >
         {children}

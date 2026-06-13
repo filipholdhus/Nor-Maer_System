@@ -46,6 +46,45 @@
   color: var(--nm-text-1);
 }
 
+.nm-admin-skal {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.nm-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.nm-admin-innhald {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.nm-mobil-toppfelt,
+.nm-meny-bakgrunn,
+.nm-sidebar-lukk {
+  display: none;
+}
+
+.nm-merkeikon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--nm-r-sm);
+  background: var(--nm-accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
 /* Mono-klasse — bruk på jobbkort-nr, tider, tal */
 .font-nm-mono {
   font-family: var(--font-dm-mono), ui-monospace, "Cascadia Code", monospace;
@@ -585,6 +624,200 @@
 }
 
 /* ── Utskrift ───────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .nm-admin-skal {
+    display: grid;
+    grid-template-rows: 52px minmax(0, 1fr);
+  }
+
+  .nm-mobil-toppfelt {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--nm-border);
+    background: var(--nm-surface-1);
+    position: relative;
+    z-index: 30;
+  }
+
+  .nm-mobil-menyknapp,
+  .nm-sidebar-lukk {
+    display: inline-flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    color: var(--nm-text-1);
+    border-radius: var(--nm-r-md);
+  }
+
+  .nm-mobil-menyknapp:active,
+  .nm-sidebar-lukk:active {
+    background: var(--nm-surface-3);
+  }
+
+  .nm-mobil-merke {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .nm-mobil-brukar {
+    max-width: 92px;
+    overflow: hidden;
+    color: var(--nm-text-2);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nm-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 50;
+    width: min(86vw, 300px) !important;
+    transform: translateX(-102%);
+    transition: transform 160ms ease;
+    box-shadow: 18px 0 50px rgba(0, 0, 0, 0.35);
+  }
+
+  .nm-sidebar-open {
+    transform: translateX(0);
+  }
+
+  .nm-sidebar-lukk {
+    margin-left: auto;
+  }
+
+  .nm-meny-bakgrunn {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.68);
+  }
+
+  .nm-admin-innhald {
+    grid-row: 2;
+    width: 100%;
+    overscroll-behavior: contain;
+  }
+
+  .nm-page-header {
+    top: 0;
+    min-height: 52px;
+    padding: 10px 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nm-page-header > div:first-child {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+
+  .nm-page-body {
+    padding: 14px;
+  }
+
+  .nm-btn {
+    min-height: 42px;
+    padding: 8px 12px;
+  }
+
+  .nm-btn-sm {
+    min-height: 38px;
+    padding: 7px 10px;
+  }
+
+  .nm-input,
+  .nm-select,
+  .nm-textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .nm-dialog {
+    width: calc(100vw - 16px) !important;
+    max-height: calc(100dvh - 16px);
+  }
+
+  .nm-dialog-header,
+  .nm-dialog-body,
+  .nm-dialog-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .nm-dialog-body > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .nm-dialog-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nm-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nm-table {
+    min-width: 680px;
+  }
+
+  .nm-dashboard-body {
+    display: block;
+  }
+
+  .nm-vs-sone {
+    overflow-x: auto;
+  }
+
+  .nm-vs-sone > div {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .nm-vs-rad {
+    min-width: 430px;
+  }
+
+  .nm-kanban-sone {
+    scroll-snap-type: x proximity;
+    padding: 10px 14px 16px;
+  }
+
+  .nm-kanban-kolonne {
+    min-width: min(82vw, 300px);
+    max-width: min(82vw, 300px);
+    scroll-snap-align: start;
+  }
+
+  .nm-kanban-kolonne-body {
+    max-height: none;
+  }
+
+  .nm-kanban-kort {
+    min-height: 72px;
+    padding: 11px 12px;
+  }
+
+  .nm-feed-sone {
+    width: auto;
+    max-height: 420px;
+    margin: 0 14px 16px;
+    border: 1px solid var(--nm-border);
+    border-radius: var(--nm-r-lg);
+  }
+}
+
 @media print {
   /* Skjul admin-sidepanel og knappar */
   nav,
