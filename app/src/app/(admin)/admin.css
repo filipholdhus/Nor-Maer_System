@@ -1,0 +1,610 @@
+/* Nor-Mær admin — design-tokens
+   Definer HER. Ikkje spreie rå fargeverdiar i komponentar.
+   Bruk: color: var(--nm-venter); background: var(--nm-surface-2); osb. */
+
+.admin-root {
+  /* ── Steg-statusfargar ─────────────────────────────────────────── */
+  --nm-venter:      #d97706; /* amber-600  — ventar på neste steg   */
+  --nm-venter-bg:   rgba(217, 119,   6, 0.12);
+  --nm-paagaar:     #3b82f6; /* blue-500   — i arbeid               */
+  --nm-paagaar-bg:  rgba( 59, 130, 246, 0.12);
+  --nm-ferdig:      #22c55e; /* green-500  — fullført               */
+  --nm-ferdig-bg:   rgba( 34, 197,  94, 0.12);
+  --nm-avvik:       #ef4444; /* red-500    — avvik registrert       */
+  --nm-avvik-bg:    rgba(239,  68,  68, 0.12);
+
+  /* ── Overflatar ────────────────────────────────────────────────── */
+  --nm-bg:          #0a0a0a; /* sidebakgrunn                        */
+  --nm-surface-1:   #111111; /* sidebar, cards                      */
+  --nm-surface-2:   #161616; /* hover                               */
+  --nm-surface-3:   #1f1f1f; /* aktiv/selected                      */
+  --nm-surface-4:   #262626; /* input, code-bg                      */
+
+  /* ── Grenser ───────────────────────────────────────────────────── */
+  --nm-border:      #1f1f1f;
+  --nm-border-2:    #2a2a2a;
+
+  /* ── Tekst ─────────────────────────────────────────────────────── */
+  --nm-text-1:      #f0f0f0; /* primær                              */
+  --nm-text-2:      #8a8a8a; /* sekundær / labels                   */
+  --nm-text-3:      #4a4a4a; /* nedtonar / section-headers          */
+
+  /* ── Aksent (interaktive element) ──────────────────────────────── */
+  --nm-accent:      #3b82f6;
+  --nm-accent-hover:#2563eb;
+
+  /* ── Radius ────────────────────────────────────────────────────── */
+  --nm-r-sm:  3px;
+  --nm-r-md:  5px;
+  --nm-r-lg:  8px;
+
+  /* ── Layout ────────────────────────────────────────────────────── */
+  --nm-sidebar-w: 216px;
+
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  background: var(--nm-bg);
+  color: var(--nm-text-1);
+}
+
+/* Mono-klasse — bruk på jobbkort-nr, tider, tal */
+.font-nm-mono {
+  font-family: var(--font-dm-mono), ui-monospace, "Cascadia Code", monospace;
+}
+
+/* ── Sidebar nav-items ──────────────────────────────────────────── */
+.nm-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  margin: 1px 6px;
+  border-radius: var(--nm-r-md);
+  font-size: 13px;
+  color: var(--nm-text-2);
+  text-decoration: none;
+  transition: background 100ms ease, color 100ms ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nm-nav-item:hover {
+  background: var(--nm-surface-2);
+  color: var(--nm-text-1);
+}
+.nm-nav-item.nm-nav-aktiv {
+  background: var(--nm-surface-3);
+  color: var(--nm-text-1);
+}
+.nm-nav-item.nm-nav-aktiv .nm-nav-icon {
+  color: var(--nm-accent);
+}
+
+/* ── Admin page layout helpers ──────────────────────────────────── */
+.nm-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--nm-border);
+  background: var(--nm-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.nm-page-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--nm-text-1);
+  letter-spacing: -0.01em;
+}
+.nm-page-body {
+  padding: 20px 24px;
+}
+
+/* ── Tomme tilstandar (placeholder) ───────────────────────────────── */
+.nm-kjem-snart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 64px 24px;
+  color: var(--nm-text-3);
+  text-align: center;
+}
+.nm-kjem-snart-tittel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--nm-text-2);
+}
+.nm-kjem-snart-body {
+  font-size: 12px;
+  max-width: 280px;
+}
+
+/* ── Knapper ────────────────────────────────────────────────── */
+.nm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--nm-r-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background 100ms ease, color 100ms ease;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.nm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.nm-btn-primær {
+  background: var(--nm-accent);
+  color: #fff;
+}
+.nm-btn-primær:hover:not(:disabled) {
+  background: var(--nm-accent-hover);
+}
+.nm-btn-sekundær {
+  background: var(--nm-surface-3);
+  color: var(--nm-text-1);
+  border: 1px solid var(--nm-border-2);
+}
+.nm-btn-sekundær:hover:not(:disabled) {
+  background: var(--nm-surface-4);
+}
+.nm-btn-ghost {
+  background: transparent;
+  color: var(--nm-text-2);
+}
+.nm-btn-ghost:hover:not(:disabled) {
+  background: var(--nm-surface-2);
+  color: var(--nm-text-1);
+}
+.nm-btn-sm {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+/* ── Tabellar ───────────────────────────────────────────────── */
+.nm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.nm-table th {
+  text-align: left;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--nm-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--nm-border);
+}
+.nm-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--nm-border);
+  color: var(--nm-text-1);
+  vertical-align: middle;
+}
+.nm-table tr:last-child td {
+  border-bottom: none;
+}
+.nm-table tbody tr:hover td {
+  background: var(--nm-surface-2);
+}
+.nm-table-klikkbar tbody tr {
+  cursor: pointer;
+}
+
+/* ── Skjema-element ─────────────────────────────────────────── */
+.nm-form-gruppe {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nm-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--nm-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.nm-input,
+.nm-select,
+.nm-textarea {
+  background: var(--nm-surface-4);
+  border: 1px solid var(--nm-border-2);
+  border-radius: var(--nm-r-md);
+  padding: 7px 10px;
+  font-size: 13px;
+  color: var(--nm-text-1);
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+  transition: border-color 100ms ease;
+}
+.nm-input:focus,
+.nm-select:focus,
+.nm-textarea:focus {
+  border-color: var(--nm-accent);
+}
+.nm-input::placeholder,
+.nm-textarea::placeholder {
+  color: var(--nm-text-3);
+}
+.nm-textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+.nm-select option {
+  background: #1f1f1f;
+}
+.nm-input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--nm-accent);
+  cursor: pointer;
+}
+
+/* ── Modal (<dialog>) ───────────────────────────────────────── */
+.nm-dialog {
+  background: var(--nm-surface-1);
+  border: 1px solid var(--nm-border-2);
+  border-radius: var(--nm-r-lg);
+  padding: 0;
+  color: var(--nm-text-1);
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+.nm-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+.nm-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--nm-border);
+  position: sticky;
+  top: 0;
+  background: var(--nm-surface-1);
+  z-index: 1;
+}
+.nm-dialog-tittel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--nm-text-1);
+}
+.nm-dialog-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nm-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--nm-border);
+  position: sticky;
+  bottom: 0;
+  background: var(--nm-surface-1);
+}
+.nm-dialog-feil {
+  padding: 8px 12px;
+  border-radius: var(--nm-r-md);
+  font-size: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* ── Kort (cards) ───────────────────────────────────────────── */
+.nm-card {
+  background: var(--nm-surface-1);
+  border: 1px solid var(--nm-border);
+  border-radius: var(--nm-r-lg);
+  overflow: hidden;
+}
+.nm-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--nm-border);
+}
+.nm-card-tittel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nm-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Merkelappar ────────────────────────────────────────────── */
+.nm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.nm-badge-venter  { background: var(--nm-venter-bg);  color: var(--nm-venter);  }
+.nm-badge-paagaar { background: var(--nm-paagaar-bg); color: var(--nm-paagaar); }
+.nm-badge-ferdig  { background: var(--nm-ferdig-bg);  color: var(--nm-ferdig);  }
+.nm-badge-avvik   { background: var(--nm-avvik-bg);   color: var(--nm-avvik);   }
+.nm-badge-nøytral { background: var(--nm-surface-3);  color: var(--nm-text-2);  }
+
+/* ── Vektvalidering ─────────────────────────────────────────── */
+.nm-vekt-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--nm-ferdig);
+}
+.nm-vekt-feil {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--nm-avvik);
+}
+.nm-vekt-ukjent {
+  font-size: 12px;
+  color: var(--nm-text-3);
+}
+
+/* ── Steg-chips ─────────────────────────────────────────────── */
+.nm-steg-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--nm-r-sm);
+  font-size: 10px;
+  font-weight: 500;
+  background: var(--nm-surface-3);
+  color: var(--nm-text-2);
+  border: 1px solid var(--nm-border);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ── Framdriftsindikator ────────────────────────────────────── */
+.nm-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--nm-surface-3);
+  overflow: hidden;
+  min-width: 60px;
+}
+.nm-progress-fill {
+  height: 100%;
+  background: var(--nm-ferdig);
+  border-radius: 2px;
+}
+
+/* ── Tilbake-lenkje ─────────────────────────────────────────── */
+.nm-tilbake {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--nm-text-2);
+  text-decoration: none;
+  padding: 3px 6px;
+  border-radius: var(--nm-r-sm);
+  margin: -3px -6px;
+}
+.nm-tilbake:hover {
+  background: var(--nm-surface-2);
+  color: var(--nm-text-1);
+}
+
+/* ── Side-layout ────────────────────────────────────────────── */
+.nm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.nm-rad {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Dashboard — Value Stream ───────────────────────────────── */
+.nm-vs-sone {
+  background: var(--nm-surface-1);
+  border-bottom: 1px solid var(--nm-border);
+}
+.nm-vs-rad {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nm-vs-rad-label {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--nm-text-2);
+  width: 64px;
+  flex-shrink: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+.nm-vs-rad-label:hover {
+  color: var(--nm-text-1);
+}
+.nm-vs-bar {
+  display: flex;
+  flex: 1;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 1px;
+  background: var(--nm-surface-3);
+}
+.nm-vs-segment {
+  height: 100%;
+  transition: opacity 100ms ease;
+  min-width: 4px;
+}
+.nm-vs-segment-aktiv {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: -2px;
+}
+.nm-vs-rad-tal {
+  font-family: var(--font-dm-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--nm-text-3);
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Segment-fargar */
+.nm-vs-planlagt { background: var(--nm-surface-4); }
+.nm-vs-kapp     { background: #f97316; } /* orange-500 */
+.nm-vs-sveis    { background: #3b82f6; } /* blue-500  */
+.nm-vs-kontroll { background: #a855f7; } /* purple-500 */
+.nm-vs-admin    { background: #eab308; } /* yellow-500 */
+.nm-vs-galv     { background: #14b8a6; } /* teal-500  */
+.nm-vs-ferdig   { background: #22c55e; } /* green-500 */
+
+/* ── Dashboard — Hovudlayout ────────────────────────────────── */
+.nm-dashboard-body {
+  display: flex;
+  gap: 0;
+  min-height: 0;
+  background: var(--nm-bg);
+}
+.nm-kanban-sone {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  padding: 12px 12px 20px;
+  overflow-x: auto;
+  align-items: flex-start;
+}
+
+/* ── Dashboard — Kanban-kolonne ─────────────────────────────── */
+.nm-kanban-kolonne {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 176px;
+  max-width: 240px;
+  background: var(--nm-surface-1);
+  border: 1px solid var(--nm-border);
+  border-radius: var(--nm-r-lg);
+  overflow: hidden;
+}
+.nm-kanban-kolonne-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--nm-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--nm-text-2);
+  background: var(--nm-surface-1);
+  flex-shrink: 0;
+}
+.nm-kanban-kolonne-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
+}
+
+/* ── Dashboard — Kanban-kort ────────────────────────────────── */
+.nm-kanban-kort {
+  background: var(--nm-surface-2);
+  border: 1px solid var(--nm-border);
+  border-radius: var(--nm-r-md);
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 80ms ease, border-color 80ms ease;
+}
+.nm-kanban-kort:hover {
+  background: var(--nm-surface-3);
+}
+.nm-kanban-kort:focus-visible {
+  outline: 2px solid var(--nm-accent);
+  outline-offset: 1px;
+}
+.nm-kanban-kort-avvik {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.04);
+}
+.nm-kanban-kort-avvik:hover {
+  background: rgba(239, 68, 68, 0.08);
+}
+.nm-kanban-kort-aktiv {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+/* ── Dashboard — Aktivitetsfeed ─────────────────────────────── */
+.nm-feed-sone {
+  display: flex;
+  flex-direction: column;
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--nm-border);
+  background: var(--nm-surface-1);
+  overflow: hidden;
+  max-height: calc(100vh - 132px); /* VS + page-header */
+}
+.nm-feed-hending {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--nm-border);
+  transition: background 80ms ease;
+}
+.nm-feed-hending:hover {
+  background: var(--nm-surface-2);
+}
+.nm-feed-hending:last-child {
+  border-bottom: none;
+}
+
+/* ── Utskrift ───────────────────────────────────────────────── */
+@media print {
+  /* Skjul admin-sidepanel og knappar */
+  nav,
+  .no-print { display: none !important; }
+
+  /* Fjern overflow-avgrensing frå AdminSkal */
+  .h-screen  { height: auto !important; }
+  .overflow-hidden { overflow: visible !important; }
+  main { overflow: visible !important; }
+
+  /* Skjul sticky sideoverskrift */
+  .nm-page-header { display: none !important; }
+
+  /* Sidestorleik og margar */
+  @page { size: A5 portrait; margin: 8mm; }
+
+  /* Eitt QR-kort per side */
+  .nm-qr-print-side { page-break-after: always; }
+  .nm-qr-print-side:last-child { page-break-after: auto; }
+
+  /* Sørg for at SVG fyller containeren sin */
+  .nm-qr-svg svg { width: 100% !important; height: 100% !important; }
+}

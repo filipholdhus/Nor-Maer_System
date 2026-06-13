@@ -9,10 +9,15 @@ export async function supabaseServer() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (all) =>
-          all.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          ),
+        setAll: (all) => {
+          try {
+            all.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Server Components can't set cookies — middleware handles session refresh
+          }
+        },
       },
     }
   );
