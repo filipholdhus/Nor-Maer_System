@@ -16,7 +16,7 @@ Handhaldne skannarar (keyboard-emulering) er primær-input; QR-koden sit på pro
 Jobbkort blir oppretta av ingeniør (modell → jobbpakker → jobbkort) med tilstand `planlagt`. Admin **slepper** kortet: QR-ark blir skrive ut, lagt på tegninga, kortet går til første steg i steg-planen. Dashbordet viser dermed heile biletet: ikkje sleppt / i produksjon / hos galv / ferdig = 100 % av modellen.
 
 ## Steg-plan per jobbkort *(endring frå fast løype)*
-Ingeniøren set løypa per kort i admin. Standard: kapp → sveis → kontroll → admin_inspeksjon → galv. Smådel utan sveis kan t.d. ha kapp → galv. `sendt_tilbake` kan berre gå til steg som finst i planen.
+Ingeniøren set løypa per kort i admin. Standard: kapp → sveis → kontroll → admin_inspeksjon → galv. Smådel utan sveis kan t.d. ha kapp → galv. `sendt_tilbake` kan berre gå til steg som finst i planen, og målsteget må ligge **før** noverande steg (ingen hopp framover via rework-mekanismen). Ferdige kort kan aldri reopnast — produktet kan ha forlate huset, og audit-sporet skal forbli rein. Steg_plan kan berre innehalde kjende stegnamn (`kapp`, `sveis`, `kontroll`, `admin_inspeksjon`, `galv`) — handheva som CHECK-constraint på `jobbkort`.
 
 ## FIFO — hard handheving
 - Nivå 1: `jobbpakke.rekkefoelge` (heile pakka prioriterast, aldri enkeltkort).
