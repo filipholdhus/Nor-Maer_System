@@ -1,0 +1,68 @@
+name: SQL-testar
+
+# Køyrer migrasjonane og flyttestane mot ein rein Postgres slik at vi
+# fangar avvik i triggerar, RLS-policyar og audit-trail før dei når
+# Supabase. Workflowen feiler bygget dersom ein test feilar.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sql-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: normaer_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: normaer_test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer psql-klient
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Stub Supabase-skjema (auth + storage)
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -f scripts/lokal-test/00_auth_stub.sql \
+            -f scripts/lokal-test/00_storage_stub.sql
+
+      - name: Køyr migrasjonar 0001–0005
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -f supabase/migrations/0001_grunnskjema.sql \
+            -f supabase/migrations/0002_flytlogikk.sql \
+            -f supabase/migrations/0003_rls.sql \
+            -f supabase/migrations/0004_storage.sql \
+            -f supabase/migrations/0005_jobbkort_integritet.sql
+
+      - name: Køyr flyt-testar (01)
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -f scripts/lokal-test/01_flyt_test.sql
+
+      - name: Køyr integritet-testar (02)
+        run: |
+          psql -v ON_ERROR_STOP=1 \
+            -f scripts/lokal-test/02_integritet_test.sql

@@ -29,12 +29,8 @@ To produkt i eitt repo: admin-panel (kontor, desktop) og skanne-app (verkstadgol
 ## Verifikasjon — køyr dette før du seier deg ferdig
 
 ```bash
-# 1. Skjema + flyt-testar (krev lokal Postgres, sjå README):
-psql -d normaer_test -f scripts/lokal-test/00_auth_stub.sql \
-  -f supabase/migrations/0001_grunnskjema.sql \
-  -f supabase/migrations/0002_flytlogikk.sql \
-  -f supabase/migrations/0003_rls.sql \
-  && psql -d normaer_test -f scripts/lokal-test/01_flyt_test.sql
+# 1. Skjema + flyt-testar — fullt kommando-sett i README.md (Docker eller lokal Postgres).
+#    Same flyt køyrer i GitHub Actions (.github/workflows/sql-tests.yml).
 # Forventa: alle "OK:"-linjer + "ALLE TESTAR PASSERTE". Databasen kan droppast/gjenskapast fritt.
 
 # 2. Frontend:
